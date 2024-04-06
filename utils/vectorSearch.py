@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 import os
 from langchain.chains import RetrievalQA
 from langchain_openai import OpenAI
-from langchain_anthropic import Anthropic
+from langchain_anthropic import ChatAnthropic
 from langchain.prompts import PromptTemplate
 
 
@@ -40,7 +40,7 @@ def answerQuestion(query):
     )
     
     qa = RetrievalQA.from_chain_type(
-        llm=Anthropic(),
+        llm=ChatAnthropic(),
         chain_type="stuff",
         retriever=qa_retriever,
         return_source_documents=True,
