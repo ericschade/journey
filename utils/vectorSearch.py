@@ -40,7 +40,7 @@ def answerQuestion(query):
     )
     
     qa = RetrievalQA.from_chain_type(
-        llm=ChatAnthropic(),
+        llm=ChatAnthropic(model='claude-3-sonnet-20240229'),
         chain_type="stuff",
         retriever=qa_retriever,
         return_source_documents=True,
