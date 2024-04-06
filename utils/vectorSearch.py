@@ -52,5 +52,5 @@ def answerQuestion(query):
     return docs["result"]
 
 if __name__ == "__main__":
-    result = answerQuestion("How do I feel when I go backpacking?")
+    result = answerQuestion("Do I like backpacking?")
     print(result)
