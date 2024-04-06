@@ -1,7 +1,6 @@
 const express = require('express');
 const { generatePrompt } = require('../utils/promptGenerator');
-const Story = require('../models/storySchema');
-const Analysis = require('../models/analysisSchema');
+const Memory = require('../models/memoriesCollectionSchema');
 const Character = require('../models/characterSchema');
 const { isAuthenticated } = require('./middleware/authMiddleware');
 const router = express.Router();
@@ -35,13 +34,6 @@ router.post('/submit-story', isAuthenticated, async (req, res) => {
     const promptWords = generatePrompt();
     const textEmbedding = await generateEmbedding(text);
 
-    const story = new Story({
-      promptWords,
-      rawTextResponse: text,
-      textEmbedding
-    });
-    await story.save();
-
     // LLM Call A
     const formattedPromptA = `You are a therapist responsible for analyzing your patient’s thoughts in response to two words[ ${promptWords.join(', ')}]. You must identify the following aspects of their response:
     - Name a personality Trait that you believe pertains to the patient, according to their thoughts. Explain your reasoning in a short summary.
@@ -65,12 +57,15 @@ router.post('/submit-story', isAuthenticated, async (req, res) => {
     });
     
     const llmTextEmbedding = await generateEmbedding(text);
-    const analysis = new Analysis({
-      story: story._id,
-      llmResponse: llmResponseA.data.choices[0].message.content,
-      llmTextEmbedding
+    const memory = new Memory({
+      promtWords: promptWords,
+      rawTextResponse: text,
+      textResponseEmbedding: textEmbedding,
+      metadataTextResponse: llmResponseA.data.choices[0].message.content,
+      metadataTextResponseEmbedding: llmTextEmbedding
     });
-    await analysis.save();
+    await memory.save();
+    console.log('Memory saved successfully')
 
     // LLM Call B
     const formattedPromptB = `The text provided is a report written by a therapist about their patient’s thoughts. It may contain information on characters in the patients thoughts, and you are responsible for serializing that data.
@@ -92,40 +87,40 @@ If there are no characters mentioned in the text or the report is malformatted, 
 
 `;
 
-const LLM_Call_B_system_message = "You are an expert at extracting and serializing data from text.";
-    const llmResponseB = await axios.post(process.env.LLM_API_URL, {
-      messages: [{ "role":"system", "content":LLM_Call_B_system_message }, { "role":"user", "content":formattedPromptB }],
-      model: process.env.LLM_MODEL,
-      temperature: 0.5, // Adjust as necessary for creativity of the output
-      max_tokens: 1024, // Maximum length of the generated summary
-    }, {
-      headers: {
-        'Authorization': `Bearer ${process.env.LLM_API_KEY}`,
-        'Content-Type': 'application/json',
-      }
-    });
+// const LLM_Call_B_system_message = "You are an expert at extracting and serializing data from text.";
+//     const llmResponseB = await axios.post(process.env.LLM_API_URL, {
+//       messages: [{ "role":"system", "content":LLM_Call_B_system_message }, { "role":"user", "content":formattedPromptB }],
+//       model: process.env.LLM_MODEL,
+//       temperature: 0.5, // Adjust as necessary for creativity of the output
+//       max_tokens: 1024, // Maximum length of the generated summary
+//     }, {
+//       headers: {
+//         'Authorization': `Bearer ${process.env.LLM_API_KEY}`,
+//         'Content-Type': 'application/json',
+//       }
+//     });
 
     // Process characters
-    const charactersString = llmResponseB.data.choices[0].message.content;
-    console.log(charactersString);
+    // const charactersString = llmResponseB.data.choices[0].message.content;
+    // console.log(charactersString);
     
-    const characters = JSON.parse(charactersString);
+    // const characters = JSON.parse(charactersString);
     
-    for (const char of charactersString) {
-      let character = await Character.findOne({ name: char.Name });
-      if (!character) {
-        character = new Character({
-          name: char.Name,
-          stories: [story._id],
-          description: char.relationship
-        });
-      } else {
-        character.stories.push(story._id);
-      }
-      await character.save();
-    }
+    // for (const char of charactersString) {
+    //   let character = await Character.findOne({ name: char.Name });
+    //   if (!character) {
+    //     character = new Character({
+    //       name: char.Name,
+    //       stories: [story._id],
+    //       description: char.relationship
+    //     });
+    //   } else {
+    //     character.stories.push(story._id);
+    //   }
+    //   await character.save();
+    // }
 
-    res.json({ message: 'Story submitted successfully' });
+    // res.json({ message: 'Story submitted successfully' });
   } catch (error) {
     console.error('Error submitting story:', error.message);
     console.error(error.stack);
