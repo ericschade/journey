@@ -12,7 +12,7 @@ def queryVectorSearch(query):
         f"mongodb+srv://{os.environ.get('mongodb_uri')}",
         "memories.memoriesCollection",
         OpenAIEmbeddings(disallowed_special=()),
-        index_name=ATLAS_VECTOR_SEARCH_INDEX_NAME,
+        index_name="text_index",
     )
     results = vector_search.similarity_search_with_score(
         query=query,
