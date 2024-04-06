@@ -106,13 +106,14 @@ const LLM_Call_B_system_message = "You are an expert at extracting and serializi
     });
 
     // Process characters
-    const charactersString = llmResponseB.data.choices[0].message.content;
-    console.log(charactersString);
-    
+    const charactersString = llmResponseB.data.choices[0].message.content;    
     const characters = JSON.parse(charactersString);
-    
-    for (const char of charactersString) {
-      let character = await Character.findOne({ name: char.Name });
+    if (characters.length === 0) {
+      res.json({ message: 'Story submitted successfully' });
+      return;
+    }
+    for (const char of characters) {
+      let character = await Character.findOne({ name: char.name });
       if (!character) {
         character = new Character({
           name: char.Name,
