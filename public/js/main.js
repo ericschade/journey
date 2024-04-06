@@ -21,8 +21,10 @@ document.addEventListener("DOMContentLoaded", function() {
 
         recognition.onresult = function(event) {
             const transcript = event.results[0][0].transcript;
+            const word1Value = document.getElementById('word1').value;
+            const word2Value = document.getElementById('word2').value;
+            sendTextToBackend(transcript, [word1Value, word2Value]);
             console.log('Captured voice input:', transcript);
-            sendTextToBackend(transcript);
         };
 
         startButton.addEventListener('click', function() {
@@ -35,13 +37,13 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 });
 
-function sendTextToBackend(text) {
+function sendTextToBackend(text, promptWords) {
     fetch('/submit-story', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ text: text }),
+        body: JSON.stringify({ text: text , promptWords: promptWords}),
     })
     .then(response => response.json())
     .then(data => {

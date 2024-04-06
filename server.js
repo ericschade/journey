@@ -6,6 +6,7 @@ const session = require("express-session");
 const MongoStore = require('connect-mongo');
 const authRoutes = require("./routes/authRoutes");
 const storyRoutes = require("./routes/storyRoutes"); // Import story routes
+const { generatePrompt } = require('./utils/promptGenerator');
 
 if (!process.env.DATABASE_URL || !process.env.SESSION_SECRET) {
   console.error("Error: config environment variables not set. Please create/edit .env configuration file.");
@@ -77,7 +78,8 @@ app.use(storyRoutes); // Use story routes
 
 // Root path response
 app.get("/", (req, res) => {
-  res.render("index");
+  const [word1, word2] = generatePrompt();
+  res.render("index", {word1: word1, word2: word2});
 });
 
 // If no routes handled the request, it's a 404

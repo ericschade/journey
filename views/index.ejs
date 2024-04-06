@@ -6,9 +6,17 @@
     <main role="main" class="container mt-4">
       <div class="text-center">
         <h1>journey</h1>
-        <button id="start-recording" class="btn btn-primary">Start Recording</button>
+        <div class="horizontal-container"></div>
+          <p>Word 1: <%= word1 %></p>
+          <p>Word 2: <%= word2 %></p>
+        </div>
+        <div class="text-center">
+          <button id="start-recording" class="btn btn-primary">Start Recording</button>
+        </div>
       </div>
     </main>
+    <input type="hidden" id="word1" value="<%= word1 %>">
+    <input type="hidden" id="word2" value="<%= word2 %>">
   </body>
 <%- include('partials/_footer.ejs') %>
   <script src="/js/main.js"></script>
