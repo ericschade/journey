@@ -5,18 +5,30 @@ from pydantic import AnyHttpUrl
 from pymongo import MongoClient
 from dotenv import load_dotenv
 import os
+from langchain.chains import RetrievalQA
+from langchain_openai import OpenAI
 
+def answerQuestion(query):
 
-def queryVectorSearch(query):
     vector_search = MongoDBAtlasVectorSearch.from_connection_string(
         f"mongodb+srv://{os.environ.get('mongodb_uri')}",
         "memories.memoriesCollection",
         OpenAIEmbeddings(disallowed_special=()),
         index_name="text_index",
     )
-    results = vector_search.similarity_search_with_score(
-        query=query,
-        k=5,
+    qa_retriever = vector_search.as_retriever(
+        search_type="similarity",
+        search_kwargs={"k": 25},
     )
     
-    return results
+    qa = RetrievalQA.from_chain_type(
+        llm=OpenAI(),
+        chain_type="stuff",
+        retriever=qa_retriever,
+        return_source_documents=True,
+        chain_type_kwargs={"prompt": "Please answer the following question:"},
+    )
+
+    docs = qa({"query": query})
+
+    print(docs)
