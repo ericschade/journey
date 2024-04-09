@@ -2,5 +2,6 @@
     An AI powered memory app for supporting individuals with memory problems.
 
     :)
-    ![Image](Journey-diagram.png)
+
+![Ingestion Diagram](Journey-diagram.png)
     
