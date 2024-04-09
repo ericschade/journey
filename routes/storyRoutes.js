@@ -33,13 +33,6 @@ router.post('/submit-story', isAuthenticated, async (req, res) => {
     console.log('Received prompt words:', promptWords);
     const textEmbedding = await generateEmbedding(text);
 
-    const story = new Story({
-      promptWords,
-      rawTextResponse: text,
-      textEmbedding
-    });
-    await story.save();
-
     // LLM Call A
     const formattedPromptA = `You are a therapist responsible for analyzing your patient’s memories and thoughts in response to two words[ ${promptWords.join(', ')}]. You must identify the following aspects of their response:
     - Name a personality Trait that you believe pertains to the patient, according to their thoughts. Explain your reasoning in a short summary.
